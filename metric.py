@@ -6,6 +6,7 @@ class Metric():
         self.count = 0
     
     def update(self,loss,batch_size=1):
+        self.losses.append(loss)
         self.loss += loss
         self.count += batch_size
     

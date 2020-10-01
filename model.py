@@ -1,8 +1,8 @@
 import torch.nn as nn
 
 class Model(nn.Module):
-    def __init__(self):
-        super().__init__
+    def __init__(self,**kwargs):
+        super().__init__()
         #TO DO
         pass
     
@@ -13,4 +13,4 @@ class Model(nn.Module):
 
     def forward(self,x):
         #TO DO
-        pass
+        return x
