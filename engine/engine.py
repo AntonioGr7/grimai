@@ -1,8 +1,6 @@
 from engine.base_engine import BaseEngine
-from tqdm import tqdm
 import torch
 import torch.nn as nn
-from cbs import CBS
 from torch.cuda import amp
 
 class Engine(BaseEngine):
@@ -17,8 +15,12 @@ class Engine(BaseEngine):
             print("Using FP16 Mixed Precision Training")
         super().__init__(model,optimizer,cbs=cbs,scaler=scaler,scheduler=None,device=device,**kwargs)
     def fit(self,epochs,train_dataloader,valid_dataloader):
+        self.run_cbs(self.cbs.before_fit, **{"engine": self})
         for epoch in range(epochs):
             train_loss = self.train(train_dataloader,cbs=self.cbs)
             valid_loss = self.eval(valid_dataloader,cbs=self.cbs)
             print(f"Epoch:{epoch}, Training Loss:{train_loss}, Validation Loss:{valid_loss}")
+            print(f"Training Accuracy: {self.recorder['train'].metrics['accuracy']}, Validation Accuracy: {self.recorder['eval'].metrics['accuracy']}")
+            print(f"Training F1 Score: {self.recorder['train'].metrics['f1_score']}, Validation F1 Score: {self.recorder['eval'].metrics['f1_score']}")
+        self.run_cbs(self.cbs.after_fit, **{"engine": self})
 

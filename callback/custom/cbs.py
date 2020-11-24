@@ -1,14 +1,24 @@
 from callback.base_callback import BaseCallBack
+from audit.plotter import Plotter
+from audit.metrics import Metrics
+import torch.nn as nn
+import torch.nn.functional as F
 from torch.cuda import amp
+import numpy as np
+
 import torch.nn as nn
 
 class CBS(BaseCallBack):
     def __init__(self):
         super().__init__()
 
-    def before_epoch(self,*args,**kwargs):
+    def before_fit(self,*args, **kwargs):
         pass
-    def after_epoch(self,*args,**kwargs):
+    def before_epoch(self,*args,**kwargs):
+        engine = kwargs['engine']
+        recorder = engine.recorder[engine.active_mode]
+        recorder.__reset__()
+    def before_batch(self,*args, **kwargs):
         pass
     def before_forward_step(self,*args,**kwargs):
         pass
@@ -42,4 +52,22 @@ class CBS(BaseCallBack):
             loss.backward()
             engine.optimizer.step()
         return loss
+    def after_batch(self,*args, **kwargs):
+        engine = kwargs['engine']
+        recorder = engine.recorder[engine.active_mode]
+        recorder.__update_batch__(engine.loss.item())
+        predictions = F.log_softmax(engine.outputs,dim=1)
+        predictions = np.argmax(predictions.detach().cpu().numpy(),axis=1)
+        targets = engine.targets.detach().cpu().numpy()
+        metrics = Metrics(targets,predictions)
+        recorder.metrics['accuracy'] = metrics.accuracy()
+        recorder.metrics['f1_score'] = metrics.f1_score()
+    def after_epoch(self, *args, **kwargs):
+        engine = kwargs['engine']
+        recorder = engine.recorder[engine.active_mode]
+        recorder.__update_epoch__()
+    def after_fit(self,*args, **kwargs):
+        engine = kwargs['engine']
+        plotter = Plotter()
+        plotter.plot_losses(engine.recorder['train'].loss_history,engine.recorder['eval'].loss_history)
 
