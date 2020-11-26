@@ -23,7 +23,6 @@ class CBS(BaseCallBack):
     def after_forward_step(self,*args,**kwargs):
         pass
     def fetch_data(self,*args,**kwargs):
-        engine = kwargs['engine']
         return self.engine.batch[0].to(self.engine.device),self.engine.batch[1].to(self.engine.device)
     def loss_function(self,*args,**kwargs):
         outputs = self.engine.outputs
