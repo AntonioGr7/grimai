@@ -5,8 +5,8 @@ import torch.optim as optim
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 from examples.mnist.mnist_model import MNISTModel
-from engine.engine import Engine
-from callback.custom.cbs import CBS
+from core.engine.engine import Engine
+from core.callback.custom.cbs import CBS
 
 
 if __name__ == "__main__":

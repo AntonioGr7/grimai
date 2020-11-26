@@ -1,4 +1,4 @@
-from exception.CallBackException import CallBackBaseException
+from core.exception.CallBackException import CallBackBaseException
 
 class CallBack:
     event_names = []

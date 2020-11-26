@@ -1,7 +1,5 @@
-from engine.base_engine import BaseEngine
-import torch
-import torch.nn as nn
-from torch.cuda import amp
+from core.engine.base_engine import BaseEngine
+
 
 class Engine(BaseEngine):
     def __init__(self,model,optimizer,cbs,scheduler=None,fp16=None,parallelize=False,device=None,**kwargs):

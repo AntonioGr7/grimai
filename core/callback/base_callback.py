@@ -1,5 +1,6 @@
-from callback.callback import CallBack
-from exception import CallBackException
+from core.callback.callback import CallBack
+from core.exception import CallBackException
+
 
 class BaseCallBack(CallBack):
     def __init__(self):
