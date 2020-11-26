@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 class Recorder:
-    def __init__(self,metrics = []):
+    def __init__(self):
         self.loss = 0
         self.loss_history = []
         self.best_loss = np.inf

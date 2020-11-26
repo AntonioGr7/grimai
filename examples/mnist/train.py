@@ -15,6 +15,7 @@ if __name__ == "__main__":
     if not os.path.exists(root):
         os.mkdir(root)
 
+
     trans = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (1.0,))])
     train_set = dset.MNIST(root=root, train=True, transform=trans, download=True)
     valid_set = dset.MNIST(root=root, train=False, transform=trans, download=True)
@@ -34,7 +35,6 @@ if __name__ == "__main__":
     my_model = MNISTModel(input_dimension=28*28,hidden_dimension=500,output_dimension=10)
     optimizer = optim.SGD(my_model.parameters(), lr=0.001, momentum=0.9)
     cbs = CBS()
-
     device = [0]
     engine = Engine(model=my_model,optimizer=optimizer,cbs=cbs,fp16=True,scheduler=None,device=device)
     engine.fit(epochs=10,train_dataloader=train_loader,valid_dataloader = valid_loader)

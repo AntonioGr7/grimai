@@ -1,10 +1,11 @@
 from core.callback.callback import CallBack
-from core.exception import CallBackException
+from core.exception.callback_exception import CallBackBaseException
 
 
 class BaseCallBack(CallBack):
     def __init__(self):
         super().__init__()
+
     def before_fit(self,*args, **kwargs):
         pass
     def before_epoch(self, *args, **kwargs):

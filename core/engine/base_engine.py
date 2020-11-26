@@ -56,12 +56,6 @@ class BaseEngine():
         self.run_cbs(cbs.after_epoch, **{"engine": self})
         return self.recorder[self.active_mode].loss
 
-    def run_cbs(self,function,*args,**kwargs):
-        @functools.wraps(function)
-        def run(*args, **kwargs):
-            return function(*args, **kwargs)
-        return run(*args,**kwargs)
-
     def configure(self):
         if isinstance(self.device, list):
             if self.parallelize:
@@ -79,3 +73,9 @@ class BaseEngine():
             print("Using FP16 Mixed Precision Training")
         else:
             self.scaler = None
+
+    def run_cbs(self,function,*args,**kwargs):
+        @functools.wraps(function)
+        def run(func_name,*args, **kwargs):
+            return self.cbs(func_name,*args, **kwargs)
+        return run(function.__name__,*args,**kwargs)
