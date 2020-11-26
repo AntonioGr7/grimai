@@ -1,7 +1,6 @@
 from callback.base_callback import BaseCallBack
 from audit.plotter import Plotter
 from audit.metrics import Metrics
-import torch.nn as nn
 import torch.nn.functional as F
 from torch.cuda import amp
 import numpy as np
@@ -70,4 +69,3 @@ class CBS(BaseCallBack):
         engine = kwargs['engine']
         plotter = Plotter()
         plotter.plot_losses(engine.recorder['train'].loss_history,engine.recorder['eval'].loss_history)
-

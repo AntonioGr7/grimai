@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ExampleModel(nn.Module):
+class MNISTModel(nn.Module):
     def __init__(self,input_dimension,hidden_dimension,output_dimension):
         super().__init__()
         self.l1 = nn.Linear(input_dimension,hidden_dimension)

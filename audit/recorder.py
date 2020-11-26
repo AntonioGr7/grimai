@@ -1,10 +1,11 @@
 from matplotlib import pyplot as plt
+import numpy as np
 
 class Recorder:
     def __init__(self,metrics = []):
         self.loss = 0
         self.loss_history = []
-
+        self.best_loss = np.inf
         self.metrics = {}
 
     def __reset__(self):

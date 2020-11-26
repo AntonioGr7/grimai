@@ -1,11 +1,10 @@
-#### Example on MNIST
+#### Example on mnist_
+import os
 import torch
-import torch.nn as nn
 import torch.optim as optim
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
-import os
-from model.example_model import ExampleModel
+from examples.mnist.mnist_model import MNISTModel
 from engine.engine import Engine
 from callback.custom.cbs import CBS
 
@@ -20,22 +19,22 @@ if __name__ == "__main__":
     train_set = dset.MNIST(root=root, train=True, transform=trans, download=True)
     valid_set = dset.MNIST(root=root, train=False, transform=trans, download=True)
 
-    batch_size = 64
+    BATCH_SIZE = 64
+    EPOCHS = 10
 
     train_loader = torch.utils.data.DataLoader(
                      dataset=train_set,
-                     batch_size=batch_size,
+                     batch_size=BATCH_SIZE,
                      shuffle=True)
     valid_loader = torch.utils.data.DataLoader(
                     dataset=valid_set,
-                    batch_size=batch_size,
+                    batch_size=BATCH_SIZE,
                     shuffle=False)
 
-    custom_model = ExampleModel(input_dimension=28*28,hidden_dimension=500,output_dimension=10)
-    optimizer = optim.SGD(custom_model.parameters(), lr=0.001, momentum=0.9)
-    criterion = nn.CrossEntropyLoss()
+    my_model = MNISTModel(input_dimension=28*28,hidden_dimension=500,output_dimension=10)
+    optimizer = optim.SGD(my_model.parameters(), lr=0.001, momentum=0.9)
     cbs = CBS()
 
     device = [0]
-    engine = Engine(model=custom_model,optimizer=optimizer,cbs=cbs,fp16=True,scheduler=None,device=device)
-    engine.fit(epochs=20,train_dataloader=train_loader,valid_dataloader = valid_loader)
+    engine = Engine(model=my_model,optimizer=optimizer,cbs=cbs,fp16=True,scheduler=None,device=device)
+    engine.fit(epochs=10,train_dataloader=train_loader,valid_dataloader = valid_loader)
