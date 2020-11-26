@@ -9,21 +9,21 @@ The objective of the library is to provide a simple and flexible approach to mod
   - Implement your Callback class that inherits from BaseCallBack. You need to implement the callback function that you want to use during the training. Each of these callbacks will be invoked automatically at each of the steps described by the method name. 
 ```python
     from core.callback.base_callback import BaseCallBack
-    class MyCBS(BaseCallBack):
-    def __init__(self):
-        super().__init__()
-    def before_fit(self,*args, **kwargs):pass
-    def before_epoch(self,*args,**kwargs):pass
-    def before_batch(self,*args, **kwargs):pass
-    def before_forward_step(self,*args,**kwargs):pass
-    def after_forward_step(self,*args,**kwargs):pass
-    def fetch_data(self,*args,**kwargs):print("Mandatory")
-    def loss_function(self,*args,**kwargs):print("Mandatory")
-    def forward_step(self,*args,**kwargs):print("Mandatory")
-    def backword_step(self,*args,**kwargs):print("Mandatory")
-    def after_batch(self,*args, **kwargs):pass
-    def after_epoch(self, *args, **kwargs):pass
-    def after_fit(self,*args, **kwargs):pass
+        class MyCBS(BaseCallBack):
+        def __init__(self):
+            super().__init__()
+        def before_fit(self,*args, **kwargs):pass
+        def before_epoch(self,*args,**kwargs):pass
+        def before_batch(self,*args, **kwargs):pass
+        def before_forward_step(self,*args,**kwargs):pass
+        def after_forward_step(self,*args,**kwargs):pass
+        def fetch_data(self,*args,**kwargs):print("Mandatory")
+        def loss_function(self,*args,**kwargs):print("Mandatory")
+        def forward_step(self,*args,**kwargs):print("Mandatory")
+        def backword_step(self,*args,**kwargs):print("Mandatory")
+        def after_batch(self,*args, **kwargs):pass
+        def after_epoch(self, *args, **kwargs):pass
+        def after_fit(self,*args, **kwargs):pass
 ```
   - Within the inherited class you will always have access to the engine, containing all the variables and methods you need. For example:
 ```python
