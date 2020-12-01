@@ -20,7 +20,7 @@ The objective of the library is to provide a simple and flexible approach to mod
             def fetch_data(self,*args,**kwargs):print("Mandatory")
             def loss_function(self,*args,**kwargs):print("Mandatory")
             def forward_step(self,*args,**kwargs):print("Mandatory")
-            def backword_step(self,*args,**kwargs):print("Mandatory")
+            def backward_step(self,*args,**kwargs):print("Mandatory")
             def after_batch(self,*args, **kwargs):pass
             def after_epoch(self, *args, **kwargs):pass
             def after_fit(self,*args, **kwargs):pass
