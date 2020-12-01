@@ -1,8 +1,7 @@
 from core.callback.base_callback import BaseCallBack
-from core.audit.plotter import Plotter
+from core.callback.built_in import Backward,Forward,Plotter,EarlyStopping
 from core.audit.metrics import Metrics
 import torch.nn.functional as F
-from torch.cuda import amp
 import numpy as np
 
 import torch.nn as nn
@@ -10,6 +9,7 @@ import torch.nn as nn
 class CBS(BaseCallBack):
     def __init__(self):
         super().__init__()
+        self.early_stopping = EarlyStopping(patience=3,path="./",model_name="prova")
 
     def before_fit(self,*args, **kwargs):
         pass
@@ -31,21 +31,16 @@ class CBS(BaseCallBack):
         return loss_fct(outputs,targets)
     def forward_step(self,*args,**kwargs):
         if self.engine.scaler is not None:
-            with amp.autocast():
-                outputs = self.engine.model(self.engine.data)
+            outputs = Forward().fp16(model=self.engine.model,data=self.engine.data)
         else:
-            outputs = self.engine.model(self.engine.data)
+            outputs = Forward().standard(model=self.engine.model,data=self.engine.data)
         return outputs
-    def backword_step(self,*args,**kwargs):
+    def backward_step(self,*args,**kwargs):
         loss = self.engine.loss
-        self.engine.optimizer.zero_grad()
         if self.engine.scaler is not None:
-            self.engine.scaler.scale(loss).backward()
-            self.engine.scaler.step(self.engine.optimizer)
-            self.engine.scaler.update()
+            Backward().fp16(loss=self.engine.loss,optimizer=self.engine.optimizer,scaler=self.engine.scaler)
         else:
-            loss.backward()
-            self.engine.optimizer.step()
+            Backward().standard(loss=self.engine.loss,optimizer=self.engine.optimizer)
         return loss
     def after_batch(self,*args, **kwargs):
         recorder = self.engine.recorder[self.engine.active_mode]
@@ -59,6 +54,9 @@ class CBS(BaseCallBack):
     def after_epoch(self, *args, **kwargs):
         recorder = self.engine.recorder[self.engine.active_mode]
         recorder.__update_epoch__()
+        stop = self.early_stopping(self.engine.loss)
+        if stop:
+            exit("Early Stop. Model Saved")
+
     def after_fit(self,*args, **kwargs):
-        plotter = Plotter()
-        plotter.plot_losses(self.engine.recorder['train'].loss_history,self.engine.recorder['eval'].loss_history)
+        Plotter().losses(self.engine.recorder['train'].loss_history,self.engine.recorder['eval'].loss_history)

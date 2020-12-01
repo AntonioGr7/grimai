@@ -4,6 +4,8 @@ from tqdm import tqdm
 from core.audit.recorder import Recorder
 import torch.nn as nn
 import torch
+import copy
+import math
 
 class BaseEngine():
     def __init__(self,model,optimizer,cbs,scheduler=None,fp16=False,parallelize=False,device=torch.device("cuda:0"),**kwargs):
@@ -16,8 +18,42 @@ class BaseEngine():
         self.scheduler = scheduler
         self.cbs = cbs
         self.active_mode = "train"
-        self.recorder = {"train":Recorder(),"eval":Recorder()}
+        self.recorder = {"train":Recorder(),"eval":Recorder(),"find_learning_rate":Recorder()}
         self.__dict__.update(kwargs)
+
+    def find_learning_rate(self,dataloader,cbs,init_value,final_value, beta):
+        self.active_mode = "find_learning_rate"
+        self.model.train()
+        self.run_cbs(cbs.before_epoch, **{"engine": self})
+        lr = init_value
+        self.optimizer.param_groups[0]['lr'] = lr
+        avg_loss,best_loss,losses,log_lrs = 0.,0.,[],[]
+        tq = tqdm(dataloader, total=len(dataloader))
+        self.batch_size = len(dataloader)
+        multiplier = (final_value / init_value) ** (1 / (self.batch_size - 1))
+        batch_num = 0
+        for self.batch_index, self.batch in enumerate(tq):
+            batch_num += 1
+            self.run_cbs(cbs.before_batch, **{"engine": self})
+            self.run_cbs(cbs.before_forward_step, **{"engine": self})
+            self.data, self.targets = self.run_cbs(cbs.fetch_data, **{"engine": self})
+            self.outputs = self.run_cbs(cbs.forward_step, **{"engine": self})
+            self.run_cbs(cbs.after_forward_step)
+            self.loss = self.run_cbs(cbs.loss_function, **{"engine": self})
+            avg_loss = beta * avg_loss + (1 - beta) * self.loss.item()
+            smoothed_loss = avg_loss / (1 - beta ** (batch_num))
+            if self.batch_index+1 > 1 and smoothed_loss > 4 * best_loss:
+                return log_lrs, losses
+            if smoothed_loss < best_loss or batch_num == 1:
+                best_loss = smoothed_loss
+            losses.append(smoothed_loss)
+            log_lrs.append(math.log10(lr))
+            self.loss = self.run_cbs(cbs.backward_step, **{"engine": self})
+            self.run_cbs(cbs.after_batch, **{"engine": self})
+            lr *= multiplier
+            self.optimizer.param_groups[0]['lr'] = lr
+        self.run_cbs(cbs.after_epoch, **{"engine": self})
+        return log_lrs, losses
 
 
     def train(self,dataloader,cbs):
@@ -33,7 +69,7 @@ class BaseEngine():
             self.outputs = self.run_cbs(cbs.forward_step,**{"engine":self})
             self.run_cbs(cbs.after_forward_step)
             self.loss = self.run_cbs(cbs.loss_function,**{"engine":self})
-            self.loss = self.run_cbs(cbs.backword_step, **{"engine": self})
+            self.loss = self.run_cbs(cbs.backward_step, **{"engine": self})
             self.run_cbs(cbs.after_batch, **{"engine": self})
         self.run_cbs(cbs.after_epoch,**{"engine":self})
         return self.recorder[self.active_mode].loss

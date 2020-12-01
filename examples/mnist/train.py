@@ -5,7 +5,7 @@ import torch.optim as optim
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 from examples.mnist.mnist_model import MNISTModel
-from core.engine.engine import Engine
+from core.engine.engine import Engine,LRFinder
 from core.callback.custom.cbs import CBS
 
 
@@ -22,6 +22,7 @@ if __name__ == "__main__":
 
     BATCH_SIZE = 64
     EPOCHS = 10
+    LEARNING_RATE = 1e-2
 
     train_loader = torch.utils.data.DataLoader(
                      dataset=train_set,
@@ -33,8 +34,12 @@ if __name__ == "__main__":
                     shuffle=False)
 
     my_model = MNISTModel(input_dimension=28*28,hidden_dimension=500,output_dimension=10)
-    optimizer = optim.SGD(my_model.parameters(), lr=0.001, momentum=0.9)
+
+    optimizer = optim.SGD(my_model.parameters(), lr=LEARNING_RATE, momentum=0.9)
     cbs = CBS()
-    device = [0]
+    device = [0,1]
+    lr_finder = LRFinder(model=my_model,optimizer=optimizer,cbs=cbs,fp16=True,scheduler=None,device=device)
+    lr_finder.find_lr(dataloader=train_loader)
+
     engine = Engine(model=my_model,optimizer=optimizer,cbs=cbs,fp16=True,scheduler=None,device=device)
-    engine.fit(epochs=10,train_dataloader=train_loader,valid_dataloader = valid_loader)
+    engine.fit(epochs=EPOCHS,train_dataloader=train_loader,valid_dataloader=valid_loader)

@@ -20,7 +20,7 @@ class BaseCallBack(CallBack):
         raise CallBackException("forward step must be implemented")
     def after_forward_step(self, *args, **kwargs):
         pass
-    def backword_step(self, *args, **kwargs):
+    def backward_step(self, *args, **kwargs):
         raise CallBackException("backword step data must be implemented")
     def loss_function(self,*args,**kwargs):
         raise CallBackException("loss function must be implemented")
