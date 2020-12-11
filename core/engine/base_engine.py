@@ -4,7 +4,6 @@ from tqdm import tqdm
 from core.audit.recorder import Recorder
 import torch.nn as nn
 import torch
-import copy
 import math
 
 class BaseEngine():
@@ -48,7 +47,7 @@ class BaseEngine():
                 best_loss = smoothed_loss
             losses.append(smoothed_loss)
             log_lrs.append(math.log10(lr))
-            self.loss = self.run_cbs(cbs.backward_step, **{"engine": self})
+            self.run_cbs(cbs.backward_step, **{"engine": self})
             self.run_cbs(cbs.after_batch, **{"engine": self})
             lr *= multiplier
             self.optimizer.param_groups[0]['lr'] = lr
@@ -69,7 +68,7 @@ class BaseEngine():
             self.outputs = self.run_cbs(cbs.forward_step,**{"engine":self})
             self.run_cbs(cbs.after_forward_step)
             self.loss = self.run_cbs(cbs.loss_function,**{"engine":self})
-            self.loss = self.run_cbs(cbs.backward_step, **{"engine": self})
+            self.run_cbs(cbs.backward_step, **{"engine": self})
             self.run_cbs(cbs.after_batch, **{"engine": self})
         self.run_cbs(cbs.after_epoch,**{"engine":self})
         return self.recorder[self.active_mode].loss
@@ -83,6 +82,7 @@ class BaseEngine():
         self.batch_size = len(dataloader)
         for self.batch_index, self.batch in enumerate(tq):
             with torch.no_grad():
+                self.run_cbs(cbs.before_batch, **{"engine": self})
                 self.run_cbs(cbs.before_forward_step, **{"engine": self})
                 self.data, self.targets = self.run_cbs(cbs.fetch_data, **{"engine": self})
                 self.outputs = self.run_cbs(cbs.forward_step, **{"engine": self})

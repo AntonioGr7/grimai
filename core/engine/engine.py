@@ -14,8 +14,7 @@ class Engine(BaseEngine):
             train_loss = self.train(train_dataloader,cbs=self.cbs)
             valid_loss = self.eval(valid_dataloader,cbs=self.cbs)
             print(f"Epoch:{epoch}, Training Loss:{train_loss}, Validation Loss:{valid_loss}")
-            print(f"Training Accuracy: {self.recorder['train'].metrics['accuracy']}, Validation Accuracy: {self.recorder['eval'].metrics['accuracy']}")
-            print(f"Training F1 Score: {self.recorder['train'].metrics['f1_score']}, Validation F1 Score: {self.recorder['eval'].metrics['f1_score']}")
+            self.run_cbs(self.cbs.after_train_eval,**{"engine":self})
         self.run_cbs(self.cbs.after_fit, **{"engine": self})
 
 class LRFinder(BaseEngine):

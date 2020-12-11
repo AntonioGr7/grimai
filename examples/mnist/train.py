@@ -5,6 +5,7 @@ import torch.optim as optim
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
 from examples.mnist.mnist_model import MNISTModel
+from examples.mnist.inherited_cbs import InheritedCBS
 from core.engine.engine import Engine,LRFinder
 from core.callback.custom.cbs import CBS
 
@@ -36,9 +37,9 @@ if __name__ == "__main__":
     my_model = MNISTModel(input_dimension=28*28,hidden_dimension=500,output_dimension=10)
 
     optimizer = optim.SGD(my_model.parameters(), lr=LEARNING_RATE, momentum=0.9)
-    cbs = CBS()
-    device = [0,1]
-    lr_finder = LRFinder(model=my_model,optimizer=optimizer,cbs=cbs,fp16=True,scheduler=None,device=device)
+    cbs = InheritedCBS()
+    device = [1]
+    lr_finder = LRFinder(model=my_model,optimizer=optimizer,cbs=cbs,fp16=True,parallelize=False,scheduler=None,device=device)
     lr_finder.find_lr(dataloader=train_loader)
 
     engine = Engine(model=my_model,optimizer=optimizer,cbs=cbs,fp16=True,scheduler=None,device=device)

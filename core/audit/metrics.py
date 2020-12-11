@@ -8,4 +8,4 @@ class Metrics():
     def accuracy(self):
         return accuracy_score(self.targets, self.predictions)
     def f1_score(self):
-        return f1_score(self.targets, self.predictions, average='macro')
+        return f1_score(self.targets, self.predictions, average='micro')
